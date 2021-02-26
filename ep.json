@@ -1,10 +1,10 @@
 {
-    "parts": [
-      {
-        "name": "ep_docx",
-        "hooks":{
-          "import": "ep_docx/import.js"
-        }
+  "parts": [
+    {
+      "name": "ep_docx",
+      "hooks": {
+        "import": "ep_docx/import.js"
       }
-    ]
-  
+    }
+  ]
+}
