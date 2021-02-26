@@ -30,7 +30,8 @@ exports.import = (hookName, args, callback) => {
       "p[style-name='Heading 6'] => p:fresh > h6:fresh",
 
       // CUSTOM ERWAN GOOGLE DOCS
-      "Title => p:test"
+      "p[style-name='Title'] => p:fresh > h1:fresh",
+      "p[style-name='Subtitle'] => p:fresh > h2:fresh",
     ],
     transformDocument: transformElement,
     ignoreEmptyParagraphs: settings.ep_docx.ignoreEmptyParagraphs,
