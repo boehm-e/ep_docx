@@ -1,6 +1,6 @@
 'use strict';
 
-const mammoth = require('mammoth');
+const mammoth = require('../mammoth.js');
 const fs = require('fs');
 const settings = require('ep_etherpad-lite/node/utils/Settings');
 
@@ -22,19 +22,21 @@ exports.import = (hookName, args, callback) => {
       "p[style-name='left'] => p:fresh > left",
       "p[style-name='justify'] => p:fresh > justify",
 
-      "p[style-name='Heading 1'] => p:fresh > h1:fresh",
+      "p[style-name='Heading 1'] => p:fresh > h1.test2:fresh",
       "p[style-name='Heading 2'] => p:fresh > h2:fresh",
       "p[style-name='Heading 3'] => p:fresh > h3:fresh",
       "p[style-name='Heading 4'] => p:fresh > h4:fresh",
       "p[style-name='Heading 5'] => p:fresh > h5:fresh",
       "p[style-name='Heading 6'] => p:fresh > h6:fresh",
-
+      
       // CUSTOM ERWAN GOOGLE DOCS
-      "p[style-name='Title'] => p:fresh > h1:fresh",
-      "p[style-name='Subtitle'] => p:fresh > h2:fresh",
+      "p[style-name='Title'] => p:fresh > h1.title:fresh",
+      "p[style-name='Subtitle'] => p:fresh > h2.subtitle:fresh",
     ],
     transformDocument: transformElement,
-    ignoreEmptyParagraphs: settings.ep_docx.ignoreEmptyParagraphs,
+    // ignoreEmptyParagraphs: false,
+    // includeEmbeddedStyleMap: true,
+    // includeDefaultStyleMap: true,
   };
 
   // First things first do we handle this doc type?
@@ -44,9 +46,9 @@ exports.import = (hookName, args, callback) => {
   console.log('Using mammoth[ep_docx] to convert DocX file');
 
   mammoth.convertToHtml(
-      {
-        path: srcFile,
-      }, options).then(
+    {
+      path: srcFile,
+    }, options).then(
       (result) => {
         console.log("RESULT : ", result);
         fs.writeFile(destFile, `<!doctype html>\n<html lang='en'>
@@ -54,37 +56,52 @@ exports.import = (hookName, args, callback) => {
             ${result.value}
             </body>
             </html>
-          `, 'utf8', (err) => {
+          `, 'utf8', (err, b) => {
           if (err) callback(err, null);
           callback(destFile);
         });
       })
-      .fail((e) => {
-        console.warn('Mammoth failed to import this file');
-        return callback();
-      })
-      .done(() => {
+    .fail((e) => {
+      console.warn('Mammoth failed to import this file', e, Object.keys(e), typeof e);
+      return callback();
+    })
+    .done(() => {
 
-      });
+    });
 };
 
-const transformElement = (element) => {
+
+// function transformParagraph(paragraph) {
+//   var runs = mammoth.transforms.getDescendantsOfType(paragraph, "run");
+//   console.log("PARAGRAPH ", JSON.stringify(runs))
+//   const {color, highlight} = run;
+//   return {
+//     ...paragraph,
+//     color,
+//     highlight
+//   };
+// }
+
+
+function transformElement(element) {
+  console.log("ELEMENT : ", element);
   if (element.children) {
-    element.children.forEach(transformElement);
+    var children = element.children.map(el => { console.log("CHILDREN : ", el); return transformElement(el)});
+    element = { ...element, children: children };
   }
-  if (element.type === 'paragraph') {
-    if (element.alignment === 'center' && !element.styleId) {
-      element.styleName = 'center';
-    }
-    if (element.alignment === 'left' && !element.styleId) {
-      element.styleName = 'left';
-    }
-    if (element.alignment === 'right' && !element.styleId) {
-      element.styleName = 'right';
-    }
-    if (element.alignment === 'justify' && !element.styleId) {
-      element.styleName = 'justify';
-    }
+
+  if (element.type === "paragraph") {
+    element = transformParagraph(element);
+  }
+
+  return element;
+}
+
+function transformParagraph(element) {
+  console.log("PARAGRAPH : ", element);
+  if (element.alignment === "center" && !element.styleId) {
+      return {...element, styleId: "Heading2"};
   }
   return element;
-};
+}
+

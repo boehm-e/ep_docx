@@ -1,0 +1,11 @@
+{
+    "ep_docx.style": "Style",
+    "ep_docx.normal": "Normal",
+    "ep_docx.title": "Title",
+    "ep_docx.subtitle": "Subtitle",
+    "ep_docx.h1": "Heading 1",
+    "ep_docx.h2": "Heading 2",
+    "ep_docx.h3": "Heading 3",
+    "ep_docx.h4": "Heading 4",
+    "ep_docx.code": "Code"
+}
