@@ -3,9 +3,8 @@
 const cssFiles = ['ep_docx/static/css/editor.css'];
 
 // All our tags are block elements, so we just return them.
-const tags = ['h1', 'h2', 'h3', 'h4', 'code', 'font', 'u31title', 'subtitle', 'span'];
-// const tags = ['title', 'subtitle'];
-// const tags = ['x-whatever'];
+const tags = ['h1', 'h2', 'h3', 'h4'];
+
 exports.aceRegisterBlockElements = () => tags;
 
 // Bind the event handler to the toolbar buttons
@@ -75,12 +74,8 @@ exports.aceEditEvent = (hookName, call) => {
 
 // Our heading attribute will result in a heaading:h1... :h6 class
 exports.aceAttribsToClasses = (hookName, context) => {
-  console.log("$ aceAttribsToClasses ", context)
 
   const classes = []
-  // if (context.key == 'cls') {
-  //   classes.push(`cls:${context.value}`);
-  // }
   if (context.key == 'style') {
     classes.push(`style:${context.value}`);
   }
@@ -88,6 +83,7 @@ exports.aceAttribsToClasses = (hookName, context) => {
     classes.push(`heading:${context.value}`);
   }
 
+  console.log("$ aceAttribsToClasses ", context,)
   return classes;
 };
 
@@ -97,26 +93,64 @@ const getProperties = (cls) => {
   cls.split(" ").filter(attr => attr).forEach(attr => {
     if (attr.indexOf(":") > 0) {
       let splt = attr.split(":")
-      obj[splt[0]] = splt.splice(1).join(":")
+      if (!obj[splt[0]]) {
+        obj[splt[0]] = [];
+      }
+      obj[splt[0]].push(splt.splice(1).join(":"))
     }
   })
   return obj;
 }
 
+
 // Here we convert the class heading:h1 into a tag
 exports.aceDomLineProcessLineAttributes = (hookName, context) => {
+  return [];
+  // const cls = context.cls;
+  // const properties = getProperties(cls);
+  // console.log("$ aceDomLineProcessLineAttributes", context, properties);
+
+
+  // let modifiers = []
+
+  // if (Object.keys(properties).includes("style")) {
+  //   console.log("FOUND STYLE");
+  //   modifiers.push({
+  //     preHtml: `<span style="${properties["style"]}">`,
+  //     postHtml: `</span>`,
+  //   });
+  // }
+
+  // if (Object.keys(properties).includes("heading")) {
+  //   let heading = properties["heading"];
+  //   console.log("FOUND HEADING ", heading);
+
+  //   if (tags.indexOf(heading) >= 0) {
+  //     modifiers.push({
+  //       preHtml: `<${heading}>`,
+  //       postHtml: `</${heading}>`,
+  //       processedMarker: true,
+  //     });
+  //   }
+  // } 
+  // return modifiers;
+};
+
+// Here we convert the class color:red into a tag
+exports.aceCreateDomLine = (name, context) => {
+
   const cls = context.cls;
   const properties = getProperties(cls);
-  console.log("$ aceDomLineProcessLineAttributes", context, properties);
 
 
   let modifiers = []
-  
+
   if (Object.keys(properties).includes("style")) {
     console.log("FOUND STYLE");
     modifiers.push({
-      preHtml: `<span style="${properties["style"]}">`,
-      postHtml: `</span>`,
+      extraOpenTags: `<span style="${properties["style"].join("; ")}">`,
+      extraCloseTags: `</span>`,
+      // cls: "testclass"
     });
   }
 
@@ -124,15 +158,39 @@ exports.aceDomLineProcessLineAttributes = (hookName, context) => {
     let heading = properties["heading"];
     console.log("FOUND HEADING ", heading);
 
-    if (tags.indexOf(heading) >= 0) {
-      modifiers.push({
-        preHtml: `<${heading}>`,
-        postHtml: `</${heading}>`,
-        processedMarker: true,
-      });
-    }
-  } 
+
+    properties["heading"].forEach(_heading => {
+      if (tags.indexOf(_heading) >= 0) {
+        modifiers.push({
+          extraOpenTags: `<${_heading}>`,
+          extraCloseTags: `</${_heading}>`,
+        });
+      }
+    });
+
+  }
+
+  console.log("$ aceCreateDomLine", context, "properties", properties, "modifiers", modifiers);
   return modifiers;
+
+
+
+  // const cls = context.cls;
+  // const colorsType = /(?:^| )color:([A-Za-z0-9]*)/.exec(cls);
+
+  // let tagIndex;
+  // if (colorsType) tagIndex = _.indexOf(colors, colorsType[1]);
+
+
+  // if (tagIndex !== undefined && tagIndex >= 0) {
+  //   const modifier = {
+  //     extraOpenTags: '',
+  //     extraCloseTags: '',
+  //     cls,
+  //   };
+  //   return [modifier];
+  // }
+  return [];
 };
 
 // Once ace is initialized, we set ace_doInsertHeading and bind it to the context
@@ -157,4 +215,5 @@ exports.aceInitialized = (hookName, context) => {
   };
 };
 
+// not working
 exports.aceEditorCSS = () => cssFiles;

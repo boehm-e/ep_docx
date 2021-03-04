@@ -47,3 +47,10 @@ exports.getLineHTMLForExport = async (hookName, context) => {
     return context.lineContent;
   }
 };
+
+// custom css
+exports.eejsBlock_styles = (hookName, args, cb) => {
+  args.content = args.content + eejs.require("ep_docx/templates/styles.html", {}, module);
+  return cb();
+};
+

@@ -17,10 +17,10 @@ exports.import = (hookName, args, callback) => {
 
   const options = {
     styleMap: [
-      "p[style-name='center'] => p:fresh > center",
-      "p[style-name='right'] => p:fresh > right",
-      "p[style-name='left'] => p:fresh > left",
-      "p[style-name='justify'] => p:fresh > justify",
+      // "p[style-name='center'] => p:fresh > center",
+      // "p[style-name='right'] => p:fresh > right",
+      // "p[style-name='left'] => p:fresh > left",
+      // "p[style-name='justify'] => p:fresh > justify",
 
       "p[style-name='Heading 1'] => p:fresh > h1.test2:fresh",
       "p[style-name='Heading 2'] => p:fresh > h2:fresh",
@@ -33,10 +33,11 @@ exports.import = (hookName, args, callback) => {
       "p[style-name='Title'] => p:fresh > h1.title:fresh",
       "p[style-name='Subtitle'] => p:fresh > h2.subtitle:fresh",
     ],
-    transformDocument: transformElement,
-    // ignoreEmptyParagraphs: false,
-    // includeEmbeddedStyleMap: true,
-    // includeDefaultStyleMap: true,
+    // transformDocument: transformElement,
+    // transformDocument: mammoth.transforms.paragraph(transformParagraph),
+    ignoreEmptyParagraphs: false,
+    includeEmbeddedStyleMap: true,
+    includeDefaultStyleMap: false,
   };
 
   // First things first do we handle this doc type?
@@ -71,37 +72,38 @@ exports.import = (hookName, args, callback) => {
 };
 
 
-// function transformParagraph(paragraph) {
-//   var runs = mammoth.transforms.getDescendantsOfType(paragraph, "run");
-//   console.log("PARAGRAPH ", JSON.stringify(runs))
-//   const {color, highlight} = run;
-//   return {
-//     ...paragraph,
-//     color,
-//     highlight
-//   };
+function transformParagraph(paragraph) {
+  var runs = mammoth.transforms.getDescendantsOfType(paragraph, "run");
+  console.log("PARAGRAPH ", JSON.stringify(runs))
+  const {color, highlight, fontSize} = run;
+  return {
+    ...paragraph,
+    color,
+    highlight,
+    fontSize
+  };
+}
+
+
+// function transformElement(element) {
+//   // console.log("ELEMENT : ", element);
+//   if (element.children) {
+//     var children = element.children.map(el => { return transformElement(el)});
+//     element = { ...element, children: children };
+//   }
+
+//   if (element.type === "paragraph") {
+//     element = transformParagraph(element);
+//   }
+
+//   return element;
 // }
 
-
-function transformElement(element) {
-  console.log("ELEMENT : ", element);
-  if (element.children) {
-    var children = element.children.map(el => { console.log("CHILDREN : ", el); return transformElement(el)});
-    element = { ...element, children: children };
-  }
-
-  if (element.type === "paragraph") {
-    element = transformParagraph(element);
-  }
-
-  return element;
-}
-
-function transformParagraph(element) {
-  console.log("PARAGRAPH : ", element);
-  if (element.alignment === "center" && !element.styleId) {
-      return {...element, styleId: "Heading2"};
-  }
-  return element;
-}
+// function transformParagraph(element) {
+//   console.log("PARAGRAPH : ", element);
+//   if (element.alignment === "center" && !element.styleId) {
+//       return {...element, styleId: "Heading2"};
+//   }
+//   return element;
+// }
 
