@@ -4,8 +4,9 @@ const cssFiles = ['ep_docx/static/css/editor.css'];
 
 // All our tags are block elements, so we just return them.
 const tags = ['h1', 'h2', 'h3', 'h4'];
+const tablesTags = ['table', 'tbody', 'td', 'tr']
 
-exports.aceRegisterBlockElements = () => tags;
+exports.aceRegisterBlockElements = () => [...tags, ...tablesTags];
 
 // Bind the event handler to the toolbar buttons
 exports.postAceInit = (hookName, context) => {
@@ -156,11 +157,18 @@ exports.aceCreateDomLine = (name, context) => {
 
   if (Object.keys(properties).includes("heading")) {
     let heading = properties["heading"];
-    console.log("FOUND HEADING ", heading);
 
 
     properties["heading"].forEach(_heading => {
       if (tags.indexOf(_heading) >= 0) {
+        console.log("FOUND HEADING ", _heading);
+        modifiers.push({
+          extraOpenTags: `<${_heading}>`,
+          extraCloseTags: `</${_heading}>`,
+        });
+      }
+      if (tablesTags.indexOf(_heading) >= 0) {
+        console.log("FOUND TABLE TAG", _heading)
         modifiers.push({
           extraOpenTags: `<${_heading}>`,
           extraCloseTags: `</${_heading}>`,
@@ -213,6 +221,16 @@ exports.aceInitialized = (hookName, context) => {
       }
     });
   };
+};
+
+exports.collectContentLineBreak = function (hook, context) {
+  console.log("$ collectContentLineBreak");
+  var tvalue = context.tvalue;
+  var breakLine = true;
+  if (tvalue && tvalue == 'tblBreak') {
+    breakLine = false;
+  }
+  return breakLine;
 };
 
 // not working

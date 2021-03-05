@@ -37,7 +37,7 @@ exports.import = (hookName, args, callback) => {
     // transformDocument: mammoth.transforms.paragraph(transformParagraph),
     ignoreEmptyParagraphs: false,
     includeEmbeddedStyleMap: true,
-    includeDefaultStyleMap: false,
+    includeDefaultStyleMap: true,
   };
 
   // First things first do we handle this doc type?
